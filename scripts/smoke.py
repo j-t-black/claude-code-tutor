@@ -18,6 +18,7 @@ from pathlib import Path
 from claude_code_tutor import content_model
 from claude_code_tutor.app import TutorApp
 from claude_code_tutor.content_model import load_manifest
+from claude_code_tutor.playground import export_example
 from claude_code_tutor.progress import Progress
 
 
@@ -48,6 +49,13 @@ async def _smoke() -> None:
         # 5. State actually hit disk and reloads.
         reloaded = Progress(state)
         assert reloaded.status(first) == "done", "progress did not persist"
+
+        # 6. A lesson's worked example exports to a real file.
+        with_example = next((lesson for lesson in manifest if lesson.example), None)
+        assert with_example is not None, "no lesson carries an example"
+        out = export_example(with_example.example, base=Path(tmp) / "playground")
+        assert out.exists() and out.read_text().strip(), "example not written"
+        print(f"example export: {with_example.id} -> {out.name}")
     print("SMOKE OK")
 
 

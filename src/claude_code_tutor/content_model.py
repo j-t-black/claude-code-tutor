@@ -26,6 +26,15 @@ _TIER_RANK: dict[str, int] = {key: i for i, (key, _) in enumerate(TIERS)}
 
 
 @dataclass(frozen=True)
+class Example:
+    """A real, runnable artifact a lesson can write into ./playground/."""
+
+    label: str
+    dest: str  # path under playground/ to write to
+    source: str  # path (relative to CONTENT_DIR) holding the literal content
+
+
+@dataclass(frozen=True)
 class Lesson:
     """One lesson, parsed from a markdown+frontmatter file."""
 
@@ -38,6 +47,7 @@ class Lesson:
     version_added: str = ""
     updated: str = ""
     prereqs: tuple[str, ...] = ()
+    example: Example | None = None
     source_path: Path | None = None
 
     @property
@@ -57,6 +67,16 @@ def _split_frontmatter(text: str) -> tuple[dict, str]:
 
 def load_lesson(path: Path) -> Lesson:
     meta, body = _split_frontmatter(path.read_text(encoding="utf-8"))
+    raw_example = meta.get("example")
+    example = (
+        Example(
+            label=str(raw_example.get("label", "example")),
+            dest=str(raw_example["dest"]),
+            source=str(raw_example["source"]),
+        )
+        if raw_example
+        else None
+    )
     return Lesson(
         id=str(meta["id"]),
         title=str(meta["title"]),
@@ -67,6 +87,7 @@ def load_lesson(path: Path) -> Lesson:
         version_added=str(meta.get("version_added", "")),
         updated=str(meta.get("updated", "")),
         prereqs=tuple(meta.get("prereqs", []) or ()),
+        example=example,
         source_path=path,
     )
 

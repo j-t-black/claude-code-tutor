@@ -19,6 +19,7 @@ from textual.widgets import Footer, Header, Markdown, Tree
 from textual.widgets.tree import TreeNode
 
 from claude_code_tutor.content_model import Lesson, group_by_tier, load_manifest
+from claude_code_tutor.playground import export_example
 from claude_code_tutor.progress import Progress
 
 WELCOME = """\
@@ -72,6 +73,7 @@ class TutorApp(App[None]):
     BINDINGS = [
         Binding("q", "quit", "Quit"),
         Binding("d", "mark_done", "Mark done"),
+        Binding("e", "export_example", "Try example"),
         Binding("ctrl+p", "command_palette", "Commands", show=True),
     ]
 
@@ -140,6 +142,17 @@ class TutorApp(App[None]):
         self._refresh_glyph(lesson.id)
         self._set_subtitle()
         self.notify(f"Marked done: {lesson.title}")
+
+    def action_export_example(self) -> None:
+        lesson = self.lessons.get(self.current_lesson_id) if self.current_lesson_id else None
+        if lesson is None:
+            self.notify("Open a lesson first.", severity="warning")
+            return
+        if lesson.example is None:
+            self.notify("This lesson has no example to export.", severity="warning")
+            return
+        path = export_example(lesson.example)
+        self.notify(f"Wrote → {path}", title=lesson.example.label)
 
     def _refresh_glyph(self, lesson_id: str) -> None:
         node = self._lesson_nodes.get(lesson_id)
