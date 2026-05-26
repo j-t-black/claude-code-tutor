@@ -15,12 +15,13 @@ from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, VerticalScroll
 from textual.theme import Theme
-from textual.widgets import Footer, Header, Markdown, Tree
+from textual.widgets import Footer, Header, Input, Markdown, Tree
 from textual.widgets.tree import TreeNode
 
 from claude_code_tutor.content_model import Lesson, group_by_tier, load_manifest
 from claude_code_tutor.playground import export_example
 from claude_code_tutor.progress import Progress
+from claude_code_tutor.simulator import simulate
 
 WELCOME = """\
 ```
@@ -39,7 +40,8 @@ Pick a lesson from the tree on the left. As you go, the glyphs track you:
 `○` unread · `◐` started · `✓` done · `●` new · `◆` updated
 
 - **Enter / click** opens a lesson (and marks it started).
-- **d** marks the current lesson done.
+- **d** marks it done · **e** writes a lesson's worked example into `./playground/`.
+- **`:`** opens a command bar to *simulate* slash commands safely.
 - **ctrl+p** opens the command palette · **q** quits.
 """
 
@@ -74,7 +76,9 @@ class TutorApp(App[None]):
         Binding("q", "quit", "Quit"),
         Binding("d", "mark_done", "Mark done"),
         Binding("e", "export_example", "Try example"),
+        Binding("colon", "command_bar", "Sim command"),
         Binding("ctrl+p", "command_palette", "Commands", show=True),
+        Binding("escape", "close_cmdbar", show=False),
     ]
 
     def __init__(self, progress: Progress | None = None) -> None:
@@ -91,6 +95,10 @@ class TutorApp(App[None]):
             yield self._build_nav()
             with VerticalScroll(id="lesson"):
                 yield Markdown(WELCOME, id="lesson-md")
+        yield Input(
+            placeholder="Simulate a slash command — e.g. /context   (Enter to run · Esc to close)",
+            id="cmdbar",
+        )
         yield Footer()
 
     def _build_nav(self) -> Tree[str | None]:
@@ -153,6 +161,29 @@ class TutorApp(App[None]):
             return
         path = export_example(lesson.example)
         self.notify(f"Wrote → {path}", title=lesson.example.label)
+
+    def action_command_bar(self) -> None:
+        bar = self.query_one("#cmdbar", Input)
+        bar.display = True
+        bar.focus()
+
+    def action_close_cmdbar(self) -> None:
+        bar = self.query_one("#cmdbar", Input)
+        if bar.display:
+            bar.value = ""
+            bar.display = False
+            self.query_one("#nav", Tree).focus()
+
+    def on_input_submitted(self, event: Input.Submitted) -> None:
+        if event.input.id != "cmdbar":
+            return
+        command = event.value.strip()
+        event.input.value = ""
+        event.input.display = False
+        self.query_one("#nav", Tree).focus()
+        if command:
+            self.query_one("#lesson-md", Markdown).update(simulate(command))
+            self.current_lesson_id = None
 
     def _refresh_glyph(self, lesson_id: str) -> None:
         node = self._lesson_nodes.get(lesson_id)

@@ -17,9 +17,12 @@ from pathlib import Path
 
 from claude_code_tutor import content_model
 from claude_code_tutor.app import TutorApp
+from textual.widgets import Input
+
 from claude_code_tutor.content_model import load_manifest
 from claude_code_tutor.playground import export_example
 from claude_code_tutor.progress import Progress
+from claude_code_tutor.simulator import simulate
 
 
 async def _smoke() -> None:
@@ -45,6 +48,16 @@ async def _smoke() -> None:
             # 4. Marking done persists.
             app.action_mark_done()
             assert app.progress.status(first) == "done", "mark_done failed"
+
+            # 5. Command bar simulates a command with no side effects.
+            assert "context window" in simulate("/context")
+            app.action_command_bar()
+            await pilot.pause()
+            assert app.query_one("#cmdbar", Input).display is True, "command bar didn't open"
+            app.query_one("#cmdbar", Input).value = "/context"
+            await pilot.press("enter")
+            await pilot.pause()
+            assert app.current_lesson_id is None, "sim command did not run"
 
         # 5. State actually hit disk and reloads.
         reloaded = Progress(state)

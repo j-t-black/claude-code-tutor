@@ -42,3 +42,10 @@ Tree > .tree--cursor {
     padding: 1 3;
     background: $background;
 }
+
+/* Simulated-command bar — hidden until you press ":" */
+#cmdbar {
+    display: none;
+    margin: 0 1;
+    border: round $accent 50%;
+}

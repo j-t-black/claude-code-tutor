@@ -93,8 +93,9 @@ def load_lesson(path: Path) -> Lesson:
 
 
 def load_manifest(content_dir: Path = CONTENT_DIR) -> list[Lesson]:
-    """Discover and sort every lesson under ``content_dir``."""
-    lessons = [load_lesson(p) for p in sorted(content_dir.rglob("*.md"))]
+    """Discover and sort every lesson under ``content_dir`` (skipping examples/)."""
+    paths = [p for p in sorted(content_dir.rglob("*.md")) if "examples" not in p.parts]
+    lessons = [load_lesson(p) for p in paths]
     lessons.sort(key=lambda lesson: (_TIER_RANK.get(lesson.tier, 99), lesson.order, lesson.title))
     return lessons
 
