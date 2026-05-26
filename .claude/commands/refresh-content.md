@@ -1,52 +1,47 @@
 ---
-description: Refresh the tutorial's lessons against the current Claude Code feature set
+description: Refresh the tutorial's lessons against the current Claude Code feature set (branch + PR + review)
 ---
 
 You are refreshing the **Claude Code Tutor** curriculum so it stays current as
 Claude Code evolves. Work in `~/dev/claude-code-tutor`. Be accurate above all —
 this content teaches people, and wrong instructions are worse than missing ones.
+Nothing lands on the main branch without review.
 
-## Steps
+## Workflow: branch → write → verify → PR → auto-review
 
-1. **See what exists.** Run `uv run python scripts/content_report.py` to list the
-   current lessons (ids, `version_added`, `updated`, content hash, title).
+1. **Branch.** `git switch -c refresh/$(date +%Y-%m-%d)`.
+2. **See what exists.** `uv run python scripts/content_report.py` (ids, versions, hashes).
+3. **Verified inventory.** Use the **claude-code-guide** agent for the CURRENT Claude
+   Code feature set — every slash command, core usage, advanced pillars, workflows.
+   Have it verify against `claude --help` and the official docs and **report the
+   Claude Code version**.
+4. **Diff and write** into `src/claude_code_tutor/content/`:
+   - **New topic** → create a lesson in the right tier folder, following the existing
+     frontmatter (`id`, `title`, `tier`, `order`, `tags`, `version_added`, `updated`)
+     and one-paragraph house style. Set `version_added` and `updated` to today.
+     For Reference entries, add a `**Related:**` line linking related commands as
+     `lesson:<id>` (every link must resolve — smoke enforces this).
+   - **Changed topic** → update the body and bump `updated` to today.
+   - **Removed feature** → `git rm` the file; note it in the changelog.
+5. **Record currency.** Update `src/claude_code_tutor/content/meta.json`:
+   `verified_against` = the Claude Code version you checked, `refreshed` = today.
+6. **Verify.** `uv run python scripts/smoke.py` must print `SMOKE OK` (parses, engine,
+   examples, freshness, and **all cross-links resolve**).
+7. **Sync the vault.** `python3 scripts/sync_vault.py`.
+8. **Commit + push + PR.** Commit with a one-line summary, `git push -u origin HEAD`,
+   then `gh pr create --fill` (title = adds/updates/removes + the version checked).
+9. **Auto-review the PR.** Review the diff for accuracy against the docs, house style,
+   and obvious errors; post the findings as a PR comment with `gh pr comment`. If
+   anything is wrong, fix it on the branch and push again.
+10. **Report + hand off.** Output a short changelog and the PR link. **Leave the merge
+    to the human** — review the PR and the auto-review comment, then merge. (Only
+    auto-merge if explicitly told to.)
 
-2. **Get a verified inventory.** Use the **claude-code-guide** agent to produce a
-   current inventory of Claude Code: every slash command, core-usage basics, the
-   advanced pillars, and power-user workflows. Tell it to verify against
-   `claude --help` and the official docs and to report the Claude Code version.
-
-3. **Diff and write.** Compare the inventory to `src/claude_code_tutor/content/`:
-   - **New topic** (no matching lesson): create a markdown file in the right tier
-     folder (`basics/`, `slash-commands/`, `advanced/`, `workflows/`), following the
-     existing frontmatter (`id`, `title`, `tier`, `order`, `tags`, `version_added`,
-     `updated`) and the one-paragraph house style. Set both `version_added` and
-     `updated` to **today's date**.
-   - **Changed topic** (lesson exists but facts moved): update the body and bump
-     **`updated`** to today. Leave `version_added` alone.
-   - **Removed feature**: only delete if it's truly gone — `git rm` the file and
-     note it in the changelog.
-   - For exportable examples, keep the artifact under `content/examples/` and the
-     `example:` frontmatter pointing at it.
-
-4. **Verify.** Run `uv run python scripts/smoke.py` — it must print `SMOKE OK`
-   (manifest parses, engine works, examples export, freshness logic holds).
-
-5. **Sync the vault.** Run `python3 scripts/sync_vault.py`.
-
-6. **Commit.** Stage and commit with a one-line summary plus a short changelog of
-   what was added/updated/removed (and the Claude Code version checked against).
-
-## Why this lights up the glyphs automatically
-
-The app derives freshness from the content itself: a **new** lesson file shows
-`●` to anyone whose stored catalog predates it, and an **edited body** (its hash
-changes) shows `◆` to anyone who had already read it. So you don't set glyph state
-by hand — writing correct content is enough.
+Once merged, the freshness glyphs light up automatically: a **new** lesson shows `●`
+and an **edited** body shows `◆` to anyone who had already read it. The app also shows
+the `verified_against` version from `meta.json` so readers know how current it is.
 
 ## Running it on a schedule
-
-To keep this automatic, set up a routine that runs this command, e.g. weekly:
 
 ```
 /schedule run /refresh-content every Monday at 9am

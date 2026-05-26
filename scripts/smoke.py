@@ -41,6 +41,11 @@ async def _smoke() -> None:
             assert target in ids, f"broken cross-link 'lesson:{target}' in {lesson.id}"
     print("reference tier + cross-links OK")
 
+    # Content currency metadata is present.
+    from claude_code_tutor.content_model import content_meta
+
+    assert content_meta().get("verified_against"), "content meta missing verified_against"
+
     # 2. App boots with an isolated progress file.
     with tempfile.TemporaryDirectory() as tmp:
         state = Path(tmp) / "progress.json"

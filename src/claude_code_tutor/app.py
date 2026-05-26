@@ -18,7 +18,7 @@ from textual.theme import Theme
 from textual.widgets import Footer, Header, Input, Markdown, Tree
 from textual.widgets.tree import TreeNode
 
-from claude_code_tutor.content_model import Lesson, group_by_tier, load_manifest
+from claude_code_tutor.content_model import Lesson, content_meta, group_by_tier, load_manifest
 from claude_code_tutor.playground import export_example
 from claude_code_tutor.progress import Progress
 from claude_code_tutor.simulator import simulate
@@ -132,7 +132,9 @@ class TutorApp(App[None]):
 
     def _set_subtitle(self) -> None:
         counts = self.progress.counts()
-        self.sub_title = f"M1 · {counts['done']}/{len(self.manifest)} done"
+        verified = content_meta().get("verified_against")
+        suffix = f" · Claude Code v{verified}" if verified else ""
+        self.sub_title = f"{counts['done']}/{len(self.manifest)} done{suffix}"
 
     def on_tree_node_selected(self, event: Tree.NodeSelected[str | None]) -> None:
         lesson_id = event.node.data

@@ -8,12 +8,14 @@ Lessons live in ``content/<tier>/NN-slug.md`` and are discovered at runtime.
 from __future__ import annotations
 
 import hashlib
+import json
 from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
 
 CONTENT_DIR = Path(__file__).resolve().parent / "content"
+CONTENT_META = CONTENT_DIR / "meta.json"
 
 # Ordered tiers: (key, display label). Order here = order in the nav tree.
 TIERS: tuple[tuple[str, str], ...] = (
@@ -115,3 +117,16 @@ def group_by_tier(lessons: list[Lesson]) -> list[tuple[str, str, list[Lesson]]]:
         if in_tier:
             grouped.append((key, label, in_tier))
     return grouped
+
+
+def content_meta() -> dict:
+    """Read content/meta.json (verified_against, refreshed). {} if absent.
+
+    The /refresh-content job updates this with the Claude Code version it last
+    verified the curriculum against; the app surfaces it so readers know how
+    current the content is relative to their installed version.
+    """
+    try:
+        return json.loads(CONTENT_META.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
