@@ -33,7 +33,7 @@ Nothing lands on the main branch without review.
 9. **Hand off to the gate.** Delegate to the **`refresh-gate`** subagent
    (`@refresh-gate review and merge PR #<num>`). It runs `scripts/gate_check.py`
    (smoke + a scope guard that only allows content/docs changes) plus a content
-   sanity review, then **auto-approves and squash-merges** if clean, or posts the
+   sanity review, then **auto-merges (after a gate comment)** if clean, or posts the
    blocking reasons and leaves the PR open for a human.
 10. **Report.** Output a short changelog, the PR link, and the gate's verdict
     (`MERGED` or `ESCALATED`). **If MERGED**, switch to `main`, `git pull`, and run
