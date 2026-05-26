@@ -1,0 +1,44 @@
+/* theme.tcss — the Claude Code Tutor stylesheet.
+ *
+ * Design lives here, decoupled from app logic (app.py). Colors are theme tokens
+ * ($accent, $surface, $foreground, …) resolved from the *active* Textual theme,
+ * so swapping the palette (ctrl+p -> "Change theme") restyles everything for
+ * free. The default palette is the custom near-mono "calm-mono" theme.
+ */
+
+Screen {
+    background: $background;
+}
+
+#body {
+    height: 1fr;
+}
+
+/* Left rail: the curriculum tree. */
+#nav {
+    width: 38;
+    padding: 1 1;
+    background: $surface;
+    border-right: vkey $accent 30%;
+}
+
+Tree {
+    background: $surface;
+}
+
+/* Quiet the connector guides so the progress glyphs lead the eye. */
+Tree > .tree--guides {
+    color: $accent 20%;
+}
+
+Tree > .tree--cursor {
+    background: $accent 20%;
+    color: $foreground;
+    text-style: none;
+}
+
+/* Reading pane: generous horizontal padding for a calm line length. */
+#lesson {
+    padding: 1 3;
+    background: $background;
+}

@@ -35,7 +35,7 @@ async def _smoke() -> None:
             await pilot.pause()
             assert app.query_one("#nav"), "nav tree missing"
             assert app.query_one("#lesson-md"), "lesson pane missing"
-            assert app.theme == "catppuccin-mocha", f"unexpected theme: {app.theme}"
+            assert app.theme == "calm-mono", f"unexpected theme: {app.theme}"
 
             first = manifest[0].id
             # 3. Opening a lesson marks it started.

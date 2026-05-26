@@ -14,6 +14,7 @@ from __future__ import annotations
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, VerticalScroll
+from textual.theme import Theme
 from textual.widgets import Footer, Header, Markdown, Tree
 from textual.widgets.tree import TreeNode
 
@@ -42,24 +43,31 @@ Pick a lesson from the tree on the left. As you go, the glyphs track you:
 """
 
 
+# A calm, near-monochrome theme in the Temen/Endel spirit — registered at mount.
+CALM_MONO = Theme(
+    name="calm-mono",
+    primary="#9aa7b1",
+    secondary="#6f7b85",
+    accent="#c8b88a",
+    foreground="#e8e6e1",
+    background="#0d0d0d",
+    surface="#141414",
+    panel="#1c1c1c",
+    success="#8fae8f",
+    warning="#d2b48c",
+    error="#c98a8a",
+    dark=True,
+    variables={
+        "footer-key-foreground": "#c8b88a",
+        "block-cursor-text-style": "none",
+    },
+)
+
+
 class TutorApp(App[None]):
     """Interactive, tutorial-style guide to Claude Code."""
 
-    CSS = """
-    #body {
-        height: 1fr;
-    }
-
-    #nav {
-        width: 38;
-        border-right: vkey $accent 50%;
-        padding: 0 1;
-    }
-
-    #lesson {
-        padding: 1 2;
-    }
-    """
+    CSS_PATH = "theme.tcss"
 
     BINDINGS = [
         Binding("q", "quit", "Quit"),
@@ -99,7 +107,8 @@ class TutorApp(App[None]):
         return f"{glyph} {lesson.title}"
 
     def on_mount(self) -> None:
-        self.theme = "catppuccin-mocha"
+        self.register_theme(CALM_MONO)
+        self.theme = "calm-mono"
         self.title = "Claude Code Tutor"
         self._set_subtitle()
         self.query_one("#nav", Tree).focus()
