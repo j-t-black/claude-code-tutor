@@ -30,12 +30,14 @@ Nothing lands on the main branch without review.
 7. **Sync the vault.** `python3 scripts/sync_vault.py`.
 8. **Commit + push + PR.** Commit with a one-line summary, `git push -u origin HEAD`,
    then `gh pr create --fill` (title = adds/updates/removes + the version checked).
-9. **Auto-review the PR.** Review the diff for accuracy against the docs, house style,
-   and obvious errors; post the findings as a PR comment with `gh pr comment`. If
-   anything is wrong, fix it on the branch and push again.
-10. **Report + hand off.** Output a short changelog and the PR link. **Leave the merge
-    to the human** — review the PR and the auto-review comment, then merge. (Only
-    auto-merge if explicitly told to.)
+9. **Hand off to the gate.** Delegate to the **`refresh-gate`** subagent
+   (`@refresh-gate review and merge PR #<num>`). It runs `scripts/gate_check.py`
+   (smoke + a scope guard that only allows content/docs changes) plus a content
+   sanity review, then **auto-approves and squash-merges** if clean, or posts the
+   blocking reasons and leaves the PR open for a human.
+10. **Report.** Output a short changelog, the PR link, and the gate's verdict
+    (`MERGED` or `ESCALATED`). **If MERGED**, switch to `main`, `git pull`, and run
+    `python3 scripts/sync_vault.py` to mirror the new content to the vault.
 
 Once merged, the freshness glyphs light up automatically: a **new** lesson shows `●`
 and an **edited** body shows `◆` to anyone who had already read it. The app also shows
