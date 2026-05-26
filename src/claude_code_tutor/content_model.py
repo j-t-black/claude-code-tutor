@@ -21,6 +21,7 @@ TIERS: tuple[tuple[str, str], ...] = (
     ("slash-commands", "Slash commands"),
     ("advanced", "Advanced"),
     ("workflows", "Workflows"),
+    ("reference", "Reference"),
 )
 TIER_LABELS: dict[str, str] = dict(TIERS)
 _TIER_RANK: dict[str, int] = {key: i for i, (key, _) in enumerate(TIERS)}

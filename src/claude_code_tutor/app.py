@@ -148,6 +148,22 @@ class TutorApp(App[None]):
             self.progress.mark(lesson_id, "started", lesson.content_hash)
             self._refresh_glyph(lesson_id)
 
+    def _goto_lesson(self, lesson_id: str) -> None:
+        """Navigate to a lesson by id — used by tree selection and cross-links."""
+        if lesson_id not in self.lessons:
+            self.notify(f"No such lesson: {lesson_id}", severity="warning")
+            return
+        node = self._lesson_nodes.get(lesson_id)
+        if node is not None:
+            self.query_one("#nav", Tree).move_cursor(node)
+        self._show_lesson(lesson_id)
+
+    def on_markdown_link_clicked(self, event: Markdown.LinkClicked) -> None:
+        """A `lesson:<id>` link in a lesson jumps to that lesson."""
+        if event.href.startswith("lesson:"):
+            event.stop()
+            self._goto_lesson(event.href[len("lesson:") :])
+
     def action_mark_done(self) -> None:
         if self.current_lesson_id is None:
             self.notify("Open a lesson first.", severity="warning")

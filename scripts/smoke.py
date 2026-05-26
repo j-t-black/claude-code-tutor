@@ -31,6 +31,16 @@ async def _smoke() -> None:
     assert manifest, f"no lessons found under {content_model.CONTENT_DIR}"
     print(f"manifest: {len(manifest)} lessons from {content_model.CONTENT_DIR}")
 
+    # Reference tier exists and every cross-link resolves to a real lesson.
+    import re
+
+    ids = {lesson.id for lesson in manifest}
+    assert "reference" in {lesson.tier for lesson in manifest}, "reference tier missing"
+    for lesson in manifest:
+        for target in re.findall(r"lesson:([a-z0-9-]+)", lesson.body):
+            assert target in ids, f"broken cross-link 'lesson:{target}' in {lesson.id}"
+    print("reference tier + cross-links OK")
+
     # 2. App boots with an isolated progress file.
     with tempfile.TemporaryDirectory() as tmp:
         state = Path(tmp) / "progress.json"
@@ -58,6 +68,12 @@ async def _smoke() -> None:
             await pilot.press("enter")
             await pilot.pause()
             assert app.current_lesson_id is None, "sim command did not run"
+
+            # 6. Cross-link navigation jumps to a lesson.
+            ref = next((lesson for lesson in manifest if lesson.tier == "reference"), None)
+            assert ref is not None, "no reference lesson"
+            app._goto_lesson(ref.id)
+            assert app.current_lesson_id == ref.id, "cross-link navigation failed"
 
         # 5. State actually hit disk and reloads.
         reloaded = Progress(state)
