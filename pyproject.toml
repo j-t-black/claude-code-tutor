@@ -1,0 +1,20 @@
+[project]
+name = "claude-code-tutor"
+version = "0.1.0"
+description = "An interactive terminal tutorial for Claude Code"
+readme = "README.md"
+authors = [
+    { name = "jtblack", email = "jb@tabhq.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "textual>=8.2.7",
+]
+
+[project.scripts]
+claude-code-tutor = "claude_code_tutor:main"
+cc-tutor = "claude_code_tutor:main"
+
+[build-system]
+requires = ["uv_build>=0.11.16,<0.12.0"]
+build-backend = "uv_build"
