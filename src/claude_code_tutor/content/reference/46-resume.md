@@ -17,4 +17,4 @@ which forks without losing the original, and [/rewind](lesson:ref-rewind), which
 rolls back within a session — together they let you move freely through your own
 history. The opposite move is [/clear](lesson:ref-clear).
 
-**Related:** [/branch](lesson:ref-branch) · [/rewind](lesson:ref-rewind) · [/clear](lesson:ref-clear)
+**Related:** [/branch](lesson:ref-branch) · [/rewind](lesson:ref-rewind) · [/clear](lesson:ref-clear) · [/recap](lesson:ref-recap)

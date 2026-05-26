@@ -16,4 +16,4 @@ exploration to one keeps your main [/context](lesson:ref-context) clean, which i
 the main reason to reach for them. The Advanced → Subagents lesson goes deep and
 exports a working example you can keep.
 
-**Related:** [/context](lesson:ref-context)
+**Related:** [/context](lesson:ref-context) · [/tasks](lesson:ref-tasks) · [/batch](lesson:ref-batch)

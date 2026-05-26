@@ -16,4 +16,4 @@ server. Use it to sanity-check spend on a long session or to see which subagents
 and servers are doing the work. When the number surprises you, pair it with
 [/context](lesson:ref-context) to see *where* the tokens are going.
 
-**Related:** [/status](lesson:ref-status) · [/context](lesson:ref-context)
+**Related:** [/status](lesson:ref-status) · [/context](lesson:ref-context) · [/model](lesson:ref-model)

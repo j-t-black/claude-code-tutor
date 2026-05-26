@@ -17,4 +17,4 @@ act. The usual follow-ups are [/compact](lesson:ref-compact) to summarise or
 [/clear](lesson:ref-clear) to reset; [/usage](lesson:ref-usage) shows the cost
 side of the same coin.
 
-**Related:** [/compact](lesson:ref-compact) · [/clear](lesson:ref-clear) · [/usage](lesson:ref-usage)
+**Related:** [/compact](lesson:ref-compact) · [/clear](lesson:ref-clear) · [/usage](lesson:ref-usage) · [/agents](lesson:ref-agents)

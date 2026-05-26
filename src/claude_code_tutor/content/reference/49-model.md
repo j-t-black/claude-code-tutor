@@ -16,4 +16,4 @@ cost, so it pairs naturally with [/usage](lesson:ref-usage). It doesn't change
 what's in your context, but a different model may use the
 [/context](lesson:ref-context) window differently.
 
-**Related:** [/usage](lesson:ref-usage) · [/context](lesson:ref-context)
+**Related:** [/usage](lesson:ref-usage) · [/context](lesson:ref-context) · [/config](lesson:ref-config) · [/effort](lesson:ref-effort)

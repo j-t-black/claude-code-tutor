@@ -16,4 +16,4 @@ signed-in account, and connectivity (including MCP servers). Handily, it works
 glance when something feels off. For what the session is *costing*, jump to
 [/usage](lesson:ref-usage).
 
-**Related:** [/help](lesson:ref-help) · [/usage](lesson:ref-usage)
+**Related:** [/help](lesson:ref-help) · [/usage](lesson:ref-usage) · [/doctor](lesson:ref-doctor)

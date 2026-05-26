@@ -16,4 +16,4 @@ Where [/branch](lesson:ref-branch) forks forward into a new line, rewind steps
 backward in the current one. Pair it with [/resume](lesson:ref-resume) to hop
 between saved states.
 
-**Related:** [/branch](lesson:ref-branch) · [/resume](lesson:ref-resume)
+**Related:** [/branch](lesson:ref-branch) · [/resume](lesson:ref-resume) · [/plan](lesson:ref-plan)

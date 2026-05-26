@@ -16,4 +16,4 @@ skills, and MCP servers, `/help` is the authoritative *live* list — more relia
 than any static cheatsheet. Run it after installing something new, or whenever
 you're hunting for a command you only half-remember.
 
-**Related:** [/status](lesson:ref-status) · [/usage](lesson:ref-usage)
+**Related:** [/status](lesson:ref-status) · [/usage](lesson:ref-usage) · [/skills](lesson:ref-skills) · [/btw](lesson:ref-btw)
