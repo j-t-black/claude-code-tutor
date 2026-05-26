@@ -1,8 +1,10 @@
-"""Headless smoke test for the M0 shell.
+"""Headless smoke test for the content engine (M1).
 
 Textual's `run_test()` mounts the app with a headless driver — no TTY needed —
-so we can prove the app boots, parses its CSS, builds the widget tree, and
-applies the theme without a human at a terminal. Run with:
+so we can prove the engine end to end: manifest loads, content files are
+discoverable (even from the installed package), the app boots, a lesson renders,
+and progress round-trips. Uses a throwaway state file so your real progress is
+untouched. Run with:
 
     uv run python scripts/smoke.py
 """
@@ -10,22 +12,42 @@ applies the theme without a human at a terminal. Run with:
 from __future__ import annotations
 
 import asyncio
+import tempfile
+from pathlib import Path
 
+from claude_code_tutor import content_model
 from claude_code_tutor.app import TutorApp
+from claude_code_tutor.content_model import load_manifest
+from claude_code_tutor.progress import Progress
 
 
 async def _smoke() -> None:
-    app = TutorApp()
-    async with app.run_test() as pilot:
-        await pilot.pause()
-        # Core widgets mounted?
-        assert app.query_one("#nav"), "nav tree missing"
-        assert app.query_one("#lesson"), "lesson pane missing"
-        assert app.query_one("#lesson-md"), "lesson markdown missing"
-        # Theme applied?
-        assert app.theme == "catppuccin-mocha", f"unexpected theme: {app.theme}"
-        # Command palette available (built-in)?
-        assert app.ENABLE_COMMAND_PALETTE, "command palette disabled"
+    # 1. Content is discoverable (proves content/*.md ships with the package).
+    manifest = load_manifest()
+    assert manifest, f"no lessons found under {content_model.CONTENT_DIR}"
+    print(f"manifest: {len(manifest)} lessons from {content_model.CONTENT_DIR}")
+
+    # 2. App boots with an isolated progress file.
+    with tempfile.TemporaryDirectory() as tmp:
+        state = Path(tmp) / "progress.json"
+        app = TutorApp(progress=Progress(state))
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            assert app.query_one("#nav"), "nav tree missing"
+            assert app.query_one("#lesson-md"), "lesson pane missing"
+            assert app.theme == "catppuccin-mocha", f"unexpected theme: {app.theme}"
+
+            first = manifest[0].id
+            # 3. Opening a lesson marks it started.
+            app._show_lesson(first)
+            assert app.progress.status(first) == "started", "open did not mark started"
+            # 4. Marking done persists.
+            app.action_mark_done()
+            assert app.progress.status(first) == "done", "mark_done failed"
+
+        # 5. State actually hit disk and reloads.
+        reloaded = Progress(state)
+        assert reloaded.status(first) == "done", "progress did not persist"
     print("SMOKE OK")
 
 

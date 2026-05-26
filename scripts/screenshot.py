@@ -16,7 +16,7 @@ async def _shot() -> None:
     app = TutorApp()
     async with app.run_test(size=(110, 32)) as pilot:
         await pilot.pause()
-        path = app.save_screenshot("m0-shell.svg", "docs/screenshots")
+        path = app.save_screenshot("shell.svg", "docs/screenshots")
         print(f"saved {path}")
 
 
