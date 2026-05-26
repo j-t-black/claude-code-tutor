@@ -86,6 +86,11 @@ class TutorApp(App[None]):
         self.manifest: list[Lesson] = load_manifest()
         self.lessons: dict[str, Lesson] = {lesson.id: lesson for lesson in self.manifest}
         self.progress: Progress = progress or Progress()
+        # Freshness: which lessons appeared since the user's last run, then record
+        # the current catalog so they won't read as "new" next time.
+        current_ids = set(self.lessons)
+        self._new_ids: set[str] = self.progress.new_ids(current_ids)
+        self.progress.register_catalog(current_ids)
         self._lesson_nodes: dict[str, TreeNode[str | None]] = {}
         self.current_lesson_id: str | None = None
 
@@ -113,7 +118,9 @@ class TutorApp(App[None]):
         return tree
 
     def _leaf_label(self, lesson: Lesson) -> str:
-        glyph = self.progress.glyph(lesson.id, lesson.version_added)
+        glyph = self.progress.glyph(
+            lesson.id, lesson.content_hash, is_new=lesson.id in self._new_ids
+        )
         return f"{glyph} {lesson.title}"
 
     def on_mount(self) -> None:
@@ -138,7 +145,7 @@ class TutorApp(App[None]):
         self.query_one("#lesson-md", Markdown).update(lesson.body)
         self.current_lesson_id = lesson_id
         if self.progress.status(lesson_id) == "unread":
-            self.progress.mark(lesson_id, "started", lesson.version_added)
+            self.progress.mark(lesson_id, "started", lesson.content_hash)
             self._refresh_glyph(lesson_id)
 
     def action_mark_done(self) -> None:
@@ -146,7 +153,7 @@ class TutorApp(App[None]):
             self.notify("Open a lesson first.", severity="warning")
             return
         lesson = self.lessons[self.current_lesson_id]
-        self.progress.mark(lesson.id, "done", lesson.version_added)
+        self.progress.mark(lesson.id, "done", lesson.content_hash)
         self._refresh_glyph(lesson.id)
         self._set_subtitle()
         self.notify(f"Marked done: {lesson.title}")

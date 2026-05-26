@@ -7,6 +7,7 @@ Lessons live in ``content/<tier>/NN-slug.md`` and are discovered at runtime.
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -53,6 +54,11 @@ class Lesson:
     @property
     def tier_label(self) -> str:
         return TIER_LABELS.get(self.tier, self.tier)
+
+    @property
+    def content_hash(self) -> str:
+        """Short hash of the body — changes whenever the lesson content changes."""
+        return hashlib.sha256(self.body.encode("utf-8")).hexdigest()[:12]
 
 
 def _split_frontmatter(text: str) -> tuple[dict, str]:

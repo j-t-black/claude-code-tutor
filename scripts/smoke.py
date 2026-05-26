@@ -69,6 +69,19 @@ async def _smoke() -> None:
         out = export_example(with_example.example, base=Path(tmp) / "playground")
         assert out.exists() and out.read_text().strip(), "example not written"
         print(f"example export: {with_example.id} -> {out.name}")
+
+        # 7. Freshness model: new (●) and updated (◆) detection.
+        from claude_code_tutor import progress as progress_mod
+
+        fresh = Progress(Path(tmp) / "fresh.json")
+        assert fresh.new_ids({"a", "b"}) == set(), "first run should flag nothing new"
+        fresh.register_catalog({"a", "b"})
+        assert fresh.new_ids({"a", "b", "c"}) == {"c"}, "new lesson not detected"
+        assert fresh.glyph("c", is_new=True) == progress_mod.GLYPHS["new"], "● wrong"
+        fresh.mark("a", "done", "hash1")
+        assert fresh.glyph("a", "hash1") == progress_mod.GLYPHS["done"], "✓ wrong"
+        assert fresh.glyph("a", "hash2") == progress_mod.GLYPHS["updated"], "◆ wrong"
+        print("freshness: ● new / ◆ updated OK")
     print("SMOKE OK")
 
 

@@ -9,6 +9,7 @@ bumps lesson versions; the machinery (storing the seen version) is here now.
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from pathlib import Path
 
 from platformdirs import user_data_dir
@@ -59,15 +60,31 @@ class Progress:
         self._data["lessons"][lesson_id] = {"status": status, "version": version}
         self.save()
 
-    def glyph(self, lesson_id: str, current_version: str = "") -> str:
-        """Glyph for a lesson, factoring in freshness vs. the version on disk."""
+    def glyph(self, lesson_id: str, current_version: str = "", is_new: bool = False) -> str:
+        """Glyph for a lesson, factoring in newness and content freshness."""
         status = self.status(lesson_id)
         if status == "unread":
-            return GLYPHS["unread"]
-        # Seen before, but the content moved on since? Flag it as updated.
+            return GLYPHS["new"] if is_new else GLYPHS["unread"]
+        # Read before, but the content has changed since? Flag it as updated.
         if current_version and current_version != self.seen_version(lesson_id):
             return GLYPHS["updated"]
         return GLYPHS[status]
+
+    def new_ids(self, current_ids: Iterable[str]) -> set[str]:
+        """Lesson ids that appeared since the catalog was last registered.
+
+        On the very first run (no catalog stored yet) nothing counts as new — we
+        don't want to flag the entire curriculum on day one.
+        """
+        current = set(current_ids)
+        if "catalog" not in self._data:
+            return set()
+        return current - set(self._data["catalog"])
+
+    def register_catalog(self, current_ids: Iterable[str]) -> None:
+        """Record the ids the user now knows about, so future additions read as new."""
+        self._data["catalog"] = sorted(set(current_ids))
+        self.save()
 
     def counts(self) -> dict[str, int]:
         done = sum(1 for v in self._data["lessons"].values() if v.get("status") == "done")
